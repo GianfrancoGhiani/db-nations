@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Scanner;
 
 public class Main {
     // MILESTONE 1
@@ -12,17 +13,32 @@ public class Main {
 
 
     public static void main(String[] args) {
+        //import
+        Scanner input = new Scanner(System.in);
+
         String url= "jdbc:mysql://localhost:3306/db_nations";
         String userpass = "root";
         try(Connection conn = DriverManager.getConnection(url, userpass, userpass)){
+
             String sql = """
                     select c.name, c.country_id , r.name, cont.name
                     from countries c
                     join regions r on r.region_id = c.region_id
                     join continents cont on cont.continent_id = r.continent_id
+                    where c.name like ?
                     order by c.name
                     """;
             try(PreparedStatement ps = conn.prepareStatement(sql)){
+                String searching = null;
+                do {
+                    System.out.println("Search for something:");
+                    searching = input.nextLine();
+                    searching = searching.replace("-", "");
+//                    System.out.println("you have searched for: " + searching);
+                }while (searching.isBlank());
+                searching = "%"+ searching + "%";
+//                System.out.println(searching);
+                ps.setString(1, searching);
                 try(ResultSet rs = ps.executeQuery()){
                     while (rs.next()){
                         System.out.print(rs.getString(1) + " ");
